@@ -5,8 +5,11 @@ import MovieDetails from "./components/MovieDetails";
 import MovieList from "./components/MovieList";
 import WatchedSummary from "./components/WatchedSummary";
 import { NavBar } from "./components/NavBar";
-import { Loader } from "./components/Loader";
-import { ErrorMessage } from "./components/ErrorMessage";
+import Loader from "./components/Loader";
+import ErrorMessage from "./components/ErrorMessage";
+import { Search, NumSearchResults } from "./components/Search";
+import { API_KEY } from './config';
+console.log("API Key in appV2:", API_KEY); // Debug line
 
 // const tempMovieData = [
 //   {
@@ -32,57 +35,40 @@ import { ErrorMessage } from "./components/ErrorMessage";
 //   },
 // ];
 
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
+// const tempWatchedData = [
+//   {
+//     imdbID: "tt1375666",
+//     Title: "Inception",
+//     Year: "2010",
+//     Poster:
+//       "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+//     runtime: 148,
+//     imdbRating: 8.8,
+//     userRating: 10,
+//   },
+//   {
+//     imdbID: "tt0088763",
+//     Title: "Back to the Future",
+//     Year: "1985",
+//     Poster:
+//       "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
+//     runtime: 116,
+//     imdbRating: 8.5,
+//     userRating: 9,
+//   },
+// ];
 
-const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
-
-const KEY = "50a95ce0";
+const KEY = API_KEY;
 
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([tempWatchedData]);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
-  // useEffect( function() {
-  //   console.log("after inital render")
-  // }, []);
-
-  // useEffect(function() {
-  //   console.log("after every render")
-  // })
-
-  // console.log("During Render");
-
-  // useEffect(function(){
-  //   console.log("d")
-  // }, [query]);
-
-  function handleSelectMovie({ id }) {
+  function handleSelectMovie(id) {
     setSelectedId((selectedId) => (selectedId === id ? null : id));
   }
 
@@ -90,8 +76,8 @@ export default function App() {
     setSelectedId(null);
   }
 
-  function handleAddWatchedMovie(movie) {
-    setWatched((watched) => [...watched, movie])
+  function handleAddWatched(movie) {
+    setWatched((watched) => [...watched, movie]);
   }
 
   useEffect(
@@ -119,10 +105,11 @@ export default function App() {
           const data = await res.json();
 
           if (data.Response === "False") {
-            throw new Error("Movie not found");
+            throw new Error( data.Error || "No matching results")
+          } else {
+            setMovies(data.Search)
+            setError("")
           }
-
-          setMovies(data.Search);
           console.log(data.Search);
         } catch (err) {
           console.error(err);
@@ -159,6 +146,7 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
+              onAddWatched={handleAddWatched}
             />
           ) : (
             <>
@@ -174,25 +162,7 @@ export default function App() {
 
 
 
-function NumSearchResults({ movies }) {
-  return (
-    <p className="num-results">
-      Found <strong>{movies.length}</strong> results
-    </p>
-  );
-}
 
-function Search({ query, setQuery }) {
-  return (
-    <input
-      className="search"
-      type="text"
-      placeholder="Search movies..."
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-    />
-  );
-}
 
 function Main({ children }) {
   return <main className="main">{children}</main>;
