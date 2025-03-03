@@ -14,7 +14,6 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched, w
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating;
 
-
   const {
     Title: title,
     Year: year,
@@ -60,6 +59,12 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched, w
     },
     [selectedId]
   );
+
+  useEffect(function() {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
+    return () => document.title = "usePopcorn";
+  }, [title]);
 
   return (
     <div className="details">
