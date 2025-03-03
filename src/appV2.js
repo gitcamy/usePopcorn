@@ -81,6 +81,7 @@ export default function App() {
           setIsLoading(false);
         }
       }
+      handleCloseMovie();
       fetchMovies();
 
       return () => controller.abort();
