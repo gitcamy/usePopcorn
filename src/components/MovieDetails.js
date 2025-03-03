@@ -6,9 +6,14 @@ import { API_KEY } from "../config";
 
 const KEY = API_KEY;
 
-export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched }) {
+export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [userRating, setUserRating] = useState('');
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
+  const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating;
+
 
   const {
     Title: title,
@@ -25,6 +30,7 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched })
 
   console.log(title, year);
 
+
   function handleAddWatched() {
     const newWatchedMovie ={
       imdbID: selectedId,
@@ -33,6 +39,7 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched })
       poster,
       runtime: runtime.split(" ").at(0),
       imbdRating: Number(imdbRating),
+      userRating,
     }
     onAddWatched(newWatchedMovie);
     onCloseMovie();
@@ -78,12 +85,22 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched })
             </div>
           </header>
           <section>
-            <div className="rating">
-              <StarRating maxRating={10} size={24} />
-              <button className="btn-add" onClick={() => handleAddWatched()}>
-                + Add to watched list
-              </button>
-            </div>
+        
+              <div className="rating">
+              {!isWatched ? (
+                <>
+                          <StarRating maxRating={10} size={24} onSetRating={setUserRating} />
+                          {userRating > 0 && <button className="btn-add" onClick={() => handleAddWatched()}>
+                          + Add to watched list
+                          </button>}
+                </>
+                  ) : (
+                    <p>
+                      You rated this movie {watchedUserRating} ⭐
+                    </p>
+                  )}
+              </div>
+          
           </section>
           <section>
             <p>
