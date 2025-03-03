@@ -29,6 +29,15 @@ export default function MovieDetails({ selectedId, onCloseMovie, onAddWatched, w
 
   console.log(title, year);
 
+  useEffect(function() {
+    function callback(e) {
+      if (e.key === "Escape") {
+        onCloseMovie();
+      }
+    }
+    document.addEventListener("keydown", callback);
+    return () => document.removeEventListener("keydown", callback);
+  }, [onCloseMovie]);
 
   function handleAddWatched() {
     const newWatchedMovie ={
